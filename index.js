@@ -4,7 +4,7 @@
 // ...
 // e.g.
 // var _ = require('lodash');
-// var mysql = require('node-mysql');
+var magento = require('magentojs');
 // ...
 
 
@@ -73,7 +73,11 @@ module.exports = (function () {
     defaults: {
 
       // For example:
-      // port: 3306,
+        host: 'www.mystore.com',
+        port: 80,
+        path: '/api/xmlrpc/',
+        login: 'myuser',
+        pass: 'mypassowrd'
       // host: 'localhost',
       // schema: true,
       // ssl: false,
@@ -91,7 +95,7 @@ module.exports = (function () {
       // drop   => Drop schema and data, then recreate it
       // alter  => Drop/add columns as necessary.
       // safe   => Don't change anything (good for production DBs)
-      migrate: 'alter'
+        migrate: 'safe'
     },
 
 
@@ -114,91 +118,6 @@ module.exports = (function () {
     },
 
 
-    /**
-     * Fired when a model is unregistered, typically when the server
-     * is killed. Useful for tearing-down remaining open connections,
-     * etc.
-     * 
-     * @param  {Function} cb [description]
-     * @return {[type]}      [description]
-     */
-    teardown: function(cb) {
-      cb();
-    },
-
-
-
-    /**
-     * 
-     * REQUIRED method if integrating with a schemaful
-     * (SQL-ish) database.
-     * 
-     * @param  {[type]}   collectionName [description]
-     * @param  {[type]}   definition     [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    define: function(collectionName, definition, cb) {
-
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-      // Define a new "table" or "collection" schema in the data store
-      cb();
-    },
-
-    /**
-     *
-     * REQUIRED method if integrating with a schemaful
-     * (SQL-ish) database.
-     * 
-     * @param  {[type]}   collectionName [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    describe: function(collectionName, cb) {
-
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-      // Respond with the schema (attributes) for a collection or table in the data store
-      var attributes = {};
-      cb(null, attributes);
-    },
-
-
-    /**
-     *
-     *
-     * REQUIRED method if integrating with a schemaful
-     * (SQL-ish) database.
-     * 
-     * @param  {[type]}   collectionName [description]
-     * @param  {[type]}   relations      [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    drop: function(collectionName, relations, cb) {
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-      // Drop a "table" or "collection" schema from the data store
-      cb();
-    },
-
-
-
-
-    // OVERRIDES NOT CURRENTLY FULLY SUPPORTED FOR:
-    // 
-    // alter: function (collectionName, changes, cb) {},
-    // addAttribute: function(collectionName, attrName, attrDef, cb) {},
-    // removeAttribute: function(collectionName, attrName, attrDef, cb) {},
-    // alterAttribute: function(collectionName, attrName, attrDef, cb) {},
-    // addIndex: function(indexName, options, cb) {},
-    // removeIndex: function(indexName, options, cb) {},
-
-
 
     /**
      * 
@@ -214,194 +133,22 @@ module.exports = (function () {
      * @param  {Function} cb             [description]
      * @return {[type]}                  [description]
      */
-    find: function(collectionName, options, cb) {
+    OrderInfo: function(collectionName, options, cb) {
 
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
+      spawnConnection(function(connection, cb) {
 
-      // Options object is normalized for you:
-      // 
-      // options.where
-      // options.limit
-      // options.skip
-      // options.sort
-      
-      // Filter, paginate, and sort records from the datastore.
-      // You should end up w/ an array of objects as a result.
-      // If no matches were found, this will be an empty array.
+        // Build find query
+        var query = sql.selectQuery(dbs[collectionName].config.dbName+'.'+dbs[collectionName].identity, options);
 
-      // Respond with an error, or the results.
-      cb(null, []);
+        magento.sales_order.info(options.orderId, function(err,order) { 
+
+          if(err) return cb(err);
+
+          cb(err, order);
+
+        });
+      }, dbs[collectionName].config, cb);
     },
-
-    /**
-     *
-     * REQUIRED method if users expect to call Model.create() or any methods
-     * 
-     * @param  {[type]}   collectionName [description]
-     * @param  {[type]}   values         [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    create: function(collectionName, values, cb) {
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-      // Create a single new model (specified by `values`)
-
-      // Respond with error or the newly-created record.
-      cb(null, values);
-    },
-
-
-
-    // 
-
-    /**
-     *
-     * 
-     * REQUIRED method if users expect to call Model.update()
-     *
-     * @param  {[type]}   collectionName [description]
-     * @param  {[type]}   options        [description]
-     * @param  {[type]}   values         [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    update: function(collectionName, options, values, cb) {
-
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-      // 1. Filter, paginate, and sort records from the datastore.
-      //    You should end up w/ an array of objects as a result.
-      //    If no matches were found, this will be an empty array.
-      //    
-      // 2. Update all result records with `values`.
-      // 
-      // (do both in a single query if you can-- it's faster)
-
-      // Respond with error or an array of updated records.
-      cb(null, []);
-    },
- 
-    /**
-     *
-     * REQUIRED method if users expect to call Model.destroy()
-     * 
-     * @param  {[type]}   collectionName [description]
-     * @param  {[type]}   options        [description]
-     * @param  {Function} cb             [description]
-     * @return {[type]}                  [description]
-     */
-    destroy: function(collectionName, options, cb) {
-
-      // If you need to access your private data for this collection:
-      var collection = _modelReferences[collectionName];
-
-
-      // 1. Filter, paginate, and sort records from the datastore.
-      //    You should end up w/ an array of objects as a result.
-      //    If no matches were found, this will be an empty array.
-      //    
-      // 2. Destroy all result records.
-      // 
-      // (do both in a single query if you can-- it's faster)
-
-      // Return an error, otherwise it's declared a success.
-      cb();
-    },
-
-
-
-    /*
-    **********************************************
-    * Optional overrides
-    **********************************************
-
-    // Optional override of built-in batch create logic for increased efficiency
-    // (since most databases include optimizations for pooled queries, at least intra-connection)
-    // otherwise, Waterline core uses create()
-    createEach: function (collectionName, arrayOfObjects, cb) { cb(); },
-
-    // Optional override of built-in findOrCreate logic for increased efficiency
-    // (since most databases include optimizations for pooled queries, at least intra-connection)
-    // otherwise, uses find() and create()
-    findOrCreate: function (collectionName, arrayOfAttributeNamesWeCareAbout, newAttributesObj, cb) { cb(); },
-    */
-
-
-    /*
-    **********************************************
-    * Custom methods
-    **********************************************
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    // > NOTE:  There are a few gotchas here you should be aware of.
-    //
-    //    + The collectionName argument is always prepended as the first argument.
-    //      This is so you can know which model is requesting the adapter.
-    //
-    //    + All adapter functions are asynchronous, even the completely custom ones,
-    //      and they must always include a callback as the final argument.
-    //      The first argument of callbacks is always an error object.
-    //      For core CRUD methods, Waterline will add support for .done()/promise usage.
-    //
-    //    + The function signature for all CUSTOM adapter methods below must be:
-    //      `function (collectionName, options, cb) { ... }`
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    // Custom methods defined here will be available on all models
-    // which are hooked up to this adapter:
-    //
-    // e.g.:
-    //
-    foo: function (collectionName, options, cb) {
-      return cb(null,"ok");
-    },
-    bar: function (collectionName, options, cb) {
-      if (!options.jello) return cb("Failure!");
-      else return cb();
-    }
-
-    // So if you have three models:
-    // Tiger, Sparrow, and User
-    // 2 of which (Tiger and Sparrow) implement this custom adapter,
-    // then you'll be able to access:
-    //
-    // Tiger.foo(...)
-    // Tiger.bar(...)
-    // Sparrow.foo(...)
-    // Sparrow.bar(...)
-
-
-    // Example success usage:
-    //
-    // (notice how the first argument goes away:)
-    Tiger.foo({}, function (err, result) {
-      if (err) return console.error(err);
-      else console.log(result);
-
-      // outputs: ok
-    });
-
-    // Example error usage:
-    //
-    // (notice how the first argument goes away:)
-    Sparrow.bar({test: 'yes'}, function (err, result){
-      if (err) console.error(err);
-      else console.log(result);
-
-      // outputs: Failure!
-    })
-
-
-    
-
-    */
 
 
   };
@@ -410,5 +157,60 @@ module.exports = (function () {
   // Expose adapter definition
   return adapter;
 
+
+  // Wrap a function in the logic necessary to provision a connection
+  // (either grab a free connection from the pool or create a new one)
+  // cb is optional (you might be streaming)
+  function spawnConnection(logic, config, cb) {
+
+
+    // Use a new connection each time
+    //if (!config.pool) {
+      magento.init(marshalConfig(config),function(err) {
+        afterwards(err, magento);
+      });
+    //}
+
+    // Use connection pooling
+    //else {
+     // adapter.pool.getConnection(afterwards);
+    //}
+
+    // Run logic using connection, then release/close it
+
+    function afterwards(err, magento) {
+      if (err) {
+        console.error("Error spawning magento:");
+        console.error(err);
+        return cb(err);
+      }
+
+        logic(magento, function(err, result) {
+
+          if (err) {
+            cb(err,1)
+            console.error("Logic error in Oracle ORM.");
+            console.error(err);
+            magento.close();
+            return ;
+          }
+
+          magento.close();
+            cb(err, result);
+        });
+    }
+  }
+
+  // Convert standard adapter config
+  // into a custom configuration object for node-mysql
+  function marshalConfig(config) {
+    return {
+      host: config.host,
+      port: config.port,
+      path: config.path,
+      login: config.login,
+      pass: config.pass
+    };
+  }
 })();
 
