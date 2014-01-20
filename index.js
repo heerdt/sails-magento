@@ -117,6 +117,14 @@ module.exports = (function () {
       cb();
     },
 
+    find: function() { return false; },
+    create: function() { return false; },
+    update: function() { return false; },
+    delete: function() { return false; },
+    findOne: function() { return false; },
+    createEach: function() { return false; },
+    updateEach: function() { return false; },
+    deleteEach: function() { return false; },
 
 
     /**
