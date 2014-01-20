@@ -1,11 +1,8 @@
 {
   "name": "sails-magento",
-  "version": "0.0.1",
-  "description": "Magento adapter for Sails / Waterline",
+  "version": "0.0.3",
+  "description": "Magento adapter for Sails / Magento",
   "main": "index.js",
-  "scripts": {
-    "test": "node test/integration/runner -R spec -b"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mayconheerdt/sails-magento.git"
