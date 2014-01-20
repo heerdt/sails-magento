@@ -1,6 +1,6 @@
 {
   "name": "sails-magento",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Magento adapter for Sails / Magento",
   "main": "index.js",
   "repository": {
@@ -19,7 +19,7 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "dependencies": {
-    "magentojs" : ">=0.0.0.1"
+    "magentojs" : "~0.0.0.1"
   },
   "devDependencies": {
     "mocha": "*",
